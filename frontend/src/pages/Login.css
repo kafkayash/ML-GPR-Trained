@@ -212,6 +212,24 @@
   color: #bae6fd;
 }
 
+/* Override browser autofill so all fields match dark theme */
+
+.loginLabel input:-webkit-autofill,
+.loginLabel input:-webkit-autofill:hover,
+.loginLabel input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px #020617 inset;
+  box-shadow: 0 0 0px 1000px #020617 inset;
+  -webkit-text-fill-color: #e5e7eb;
+  border-color: #1f2937;
+  transition: background-color 9999s ease-out, color 9999s ease-out;
+}
+
+.loginLabel input:-moz-autofill {
+  box-shadow: 0 0 0px 1000px #020617 inset;
+  -moz-text-fill-color: #e5e7eb;
+  border-color: #1f2937;
+}
+
 /* Responsive tweaks */
 @media (max-width: 900px) {
   .loginPage {
