@@ -1,6 +1,6 @@
 # backend/app/config.py
 from pathlib import Path
-
+import os
 # Base dir is .../gpr_model
 BASE_DIR = Path(__file__).resolve().parents[2]
 
@@ -17,3 +17,9 @@ GPR_RESIDUAL_PKL  = ARTIFACTS_DIR / "gpr_residual.pkl"
 CA_SCALER_PKL     = ARTIFACTS_DIR / "ca_scaler.pkl"
 F_SCALER_PKL      = ARTIFACTS_DIR / "f_scaler.pkl"
 X2_SCALER_PKL     = ARTIFACTS_DIR / "x2_scaler.pkl"
+
+SMTP_HOST = os.getenv("SMTP_HOST", "")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+SMTP_USER = os.getenv("SMTP_USER", "")
+SMTP_PASS = os.getenv("SMTP_PASS", "")
+SMTP_FROM = os.getenv("SMTP_FROM") or SMTP_USER

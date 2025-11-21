@@ -1,14 +1,22 @@
-# backend/app/main.py
-
 from typing import Literal
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, BackgroundTasks  # <-- BackgroundTasks added
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from .config import FEAT_DF_CSV
+from email.message import EmailMessage  # <-- NEW
+import smtplib  # <-- NEW
+
+from .config import (
+    FEAT_DF_CSV,
+    SMTP_HOST,
+    SMTP_PORT,
+    SMTP_USER,
+    SMTP_PASS,
+    SMTP_FROM,
+)  # <-- expanded import
 from .services import telemetry
-from .services import auth  # <-- NEW: auth service
+from .services import auth  # <-- auth service
 from . import ml_forecast
 
 
@@ -61,6 +69,49 @@ def telemetry_mapping():
         "columns": list(df.columns),
         "n_rows": len(df),
     }
+
+
+# ------------------- EMAIL HELPER (NEW) -------------------
+
+
+def send_operator_welcome_email(to_email: str, operator_id: str) -> None:
+    """
+    Fire-and-forget email sender used in BackgroundTasks.
+    Sends the new operator their unique ID.
+    """
+    # If SMTP is not configured, just no-op
+    if not (SMTP_HOST and SMTP_USER and SMTP_PASS and SMTP_FROM and to_email):
+        print("[email] SMTP not configured; skipping welcome email")
+        return
+
+    msg = EmailMessage()
+    msg["Subject"] = "Your Wind Granma Fleet Operator ID"
+    msg["From"] = SMTP_FROM
+    msg["To"] = to_email
+
+    msg.set_content(
+        f"""Hi,
+
+Congratulations on registering as a fleet operator for Wind Granma.
+
+Your unique Operator ID is: {operator_id}
+
+Use this ID together with your chosen password to log into the fleet portal.
+
+Happy monitoring,
+Wind Granma – EV Fleet Analytics
+"""
+    )
+
+    try:
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+            server.starttls()
+            server.login(SMTP_USER, SMTP_PASS)
+            server.send_message(msg)
+        print(f"[email] Welcome email sent to {to_email}")
+    except Exception as e:
+        # Don't crash the API if email fails – just log it
+        print(f"[email] Failed to send welcome email to {to_email}: {e}")
 
 
 # ------------------- VEHICLE LIST & TIMESERIES -------------------
@@ -145,14 +196,14 @@ class LoginResponse(BaseModel):
 
 
 @app.post("/auth/register", response_model=RegisterResponse)
-def register_operator(req: RegisterRequest):
+def register_operator(req: RegisterRequest, background_tasks: BackgroundTasks):
     """
     Register a new fleet operator.
 
     - Validates employee_id against artifacts/employee_ids.txt if present.
     - Ensures no duplicate employee_id or email.
     - Generates a unique operator_id like 'AB123'.
-    - Logs a welcome email text with the operator_id to the backend console.
+    - Sends a welcome email with the operator_id (SMTP).
     """
     try:
         op = auth.register_operator(
@@ -168,6 +219,13 @@ def register_operator(req: RegisterRequest):
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Registration failed: {e}")
+
+    # Schedule welcome email (non-blocking)
+    background_tasks.add_task(
+        send_operator_welcome_email,
+        to_email=op.email,
+        operator_id=op.operator_id,
+    )
 
     return RegisterResponse(
         operator_id=op.operator_id,
