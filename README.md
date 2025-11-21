@@ -48,8 +48,17 @@ SMTP_PORT=587
 SMTP_USER=yourgmail@gmail.com        # sending account
 SMTP_PASS=your_16_char_app_password  # Gmail app password, NOT normal password
 SMTP_FROM=yourgmail@gmail.com        # or "Wind Granma <yourgmail@gmail.com>"
+SECRET_KEY=some_long_random_string_here
+RESET_TOKEN_EXP_MIN=30
+FRONTEND_BASE_URL=http://localhost:5173
 ```
 
 Note that the password placed here is not your accout password but the App password, to get one login to your desired gmail account to be used for SMTP host. First and foremost make sure you have 2 step verification enabled in your security settings for safety purposes. Then to get the APP passwords just type app passwords in search bar and create one, you will get a 16-digit pin,copy and paste it here.
+
+As for the secret key you can generate it randomly on your linux terminal by the following command:
+```bash
+openssl rand -hex 32
+```
+you will get a 32 character string copy paste it..... if you are not on linux then you can generate it by whatever the other fucking method you windows noobs know.
 
 ### PS: None of this is safe for hosting the backend literally holds the passkeys and gmails in a freaking JSON file lol !
