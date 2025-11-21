@@ -50,6 +50,6 @@ SMTP_PASS=your_16_char_app_password  # Gmail app password, NOT normal password
 SMTP_FROM=yourgmail@gmail.com        # or "Wind Granma <yourgmail@gmail.com>"
 ```
 
-Note that the passowrd placed here is not your accout password but the App password, to get one login to your desired gmail account to be used for SMTP host first and foremost make sure you have 2 step verification enabled in security setting for safety purposes. Then to get the APP passwords just type ass passwords in search bar and create one, ypu will get a sixteen digit pin copy paste it here.
+Note that the password placed here is not your accout password but the App password, to get one login to your desired gmail account to be used for SMTP host. First and foremost make sure you have 2 step verification enabled in your security settings for safety purposes. Then to get the APP passwords just type app passwords in search bar and create one, you will get a 16-digit pin,copy and paste it here.
 
 ### PS: None of this is safe for hosting the backend literally holds the passkeys and gmails in a freaking JSON file lol !
